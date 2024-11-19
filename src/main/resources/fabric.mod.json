@@ -1,0 +1,33 @@
+{
+	"schemaVersion": 1,
+	"id": "map-change",
+	"version": "${version}",
+	"name": "Map Change",
+	"description": "Change map on your hand!",
+	"authors": [
+		"Vicky Silviana"
+	],
+	"contact": {
+		"homepage": "https://fabricmc.net/",
+		"sources": "https://github.com/FabricMC/fabric-example-mod"
+	},
+	"license": "CC0-1.0",
+	"icon": "assets/trade-unleash/icon.png",
+	"environment": "*",
+	"entrypoints": {
+		"main": [
+			"io.silvicky.map.Map"
+		]
+	},
+	"mixins": [
+	],
+	"depends": {
+		"fabricloader": ">=0.15.11",
+		"minecraft": "~1.21",
+		"java": ">=21",
+		"fabric-api": "*"
+	},
+	"suggests": {
+		"another-mod": "*"
+	}
+}
