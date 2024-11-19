@@ -57,6 +57,11 @@ public class MapChange {
         ItemStack itemStack=inventory.getMainHandStack();
         if(itemStack!=null)
         {
+            if(itemStack.getCount()>1)
+            {
+                source.sendFeedback(()-> Text.literal("ERR:Please hold only one!"),false);
+                return Command.SINGLE_SUCCESS;
+            }
             String curItem=itemStack.getItem().getTranslationKey();
             if(curItem.equals("item.minecraft.filled_map"))
             {
