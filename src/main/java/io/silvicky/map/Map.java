@@ -13,7 +13,7 @@ public class Map implements ModInitializer {
     public static final Logger LOGGER = LoggerFactory.getLogger("map-change");
     @Override
     public void onInitialize() {
-        LOGGER.info("Loading CombinedWorld...");
+        LOGGER.info("Loading MapChange...");
         CommandRegistrationCallback.EVENT.register((dispatcher, registryAccess, environment) -> MapChange.register(dispatcher));
 
     }
