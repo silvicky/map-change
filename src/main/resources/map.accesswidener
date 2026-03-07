@@ -1,2 +1,2 @@
 accessWidener v2 named
-accessible field net/minecraft/world/IdCountsState map I
+accessible field net/minecraft/world/level/saveddata/maps/MapIndex lastMapId I

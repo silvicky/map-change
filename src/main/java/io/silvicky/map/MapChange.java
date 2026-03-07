@@ -3,84 +3,84 @@ package io.silvicky.map;
 import com.mojang.brigadier.Command;
 import com.mojang.brigadier.CommandDispatcher;
 import com.mojang.brigadier.arguments.IntegerArgumentType;
-import net.minecraft.component.Component;
-import net.minecraft.component.ComponentChanges;
-import net.minecraft.component.type.MapIdComponent;
-import net.minecraft.entity.player.PlayerInventory;
-import net.minecraft.item.ItemStack;
-import net.minecraft.item.Items;
-import net.minecraft.nbt.NbtCompound;
-import net.minecraft.server.command.ServerCommandSource;
-import net.minecraft.text.Text;
-import net.minecraft.world.IdCountsState;
-import net.minecraft.world.PersistentState;
-import net.minecraft.world.PersistentStateType;
+import net.minecraft.core.component.TypedDataComponent;
+import net.minecraft.core.component.DataComponentPatch;
+import net.minecraft.world.level.saveddata.maps.MapId;
+import net.minecraft.world.entity.player.Inventory;
+import net.minecraft.world.item.ItemStack;
+import net.minecraft.world.item.Items;
+import net.minecraft.nbt.CompoundTag;
+import net.minecraft.commands.CommandSourceStack;
+import net.minecraft.network.chat.Component;
+import net.minecraft.world.level.saveddata.maps.MapIndex;
+import net.minecraft.world.level.saveddata.SavedData;
+import net.minecraft.world.level.saveddata.SavedDataType;
 
-import static net.minecraft.component.DataComponentTypes.MAP_ID;
-import static net.minecraft.server.command.CommandManager.argument;
-import static net.minecraft.server.command.CommandManager.literal;
+import static net.minecraft.core.component.DataComponents.MAP_ID;
+import static net.minecraft.commands.Commands.argument;
+import static net.minecraft.commands.Commands.literal;
 
 public class MapChange {
-    public static void register(CommandDispatcher<ServerCommandSource> dispatcher)
+    public static void register(CommandDispatcher<CommandSourceStack> dispatcher)
     {
         dispatcher.register(
                 literal("mapchange")
                         .then(argument("ID", IntegerArgumentType.integer())
                                 .executes(context -> mapChange(context.getSource(),IntegerArgumentType.getInteger(context,"ID")))));
     }
-    public static int mapChange(ServerCommandSource source, int id)
+    public static int mapChange(CommandSourceStack source, int id)
     {
-        IdCountsState idCountsState= source.getServer().getOverworld().getPersistentStateManager().getOrCreate
+        MapIndex idCountsState= source.getServer().overworld().getDataStorage().computeIfAbsent
                 (
                         //IdCountsState.getPersistentStateType(), "idcounts"
-                       IdCountsState.STATE_TYPE
+                       MapIndex.TYPE
                 );
         /*NbtCompound nbtCompound=new NbtCompound();
 
         idCountsState.writeNbt(nbtCompound,source.getRegistryManager());
         int maxId=nbtCompound.getInt("map").get();*/
-        int maxId=idCountsState.map;
+        int maxId=idCountsState.lastMapId;
         if(id<0||id>maxId)
         {
-            source.sendFeedback(()-> Text.literal("ERR:Invalid ID!"),false);
+            source.sendSuccess(()-> Component.literal("ERR:Invalid ID!"),false);
             return Command.SINGLE_SUCCESS;
         }
-        PlayerInventory inventory=source.getPlayer().getInventory();
+        Inventory inventory=source.getPlayer().getInventory();
         if(inventory==null)
         {
-            source.sendFeedback(()-> Text.literal("ERR:Empty inventory!"),false);
+            source.sendSuccess(()-> Component.literal("ERR:Empty inventory!"),false);
             return Command.SINGLE_SUCCESS;
         }
-        ItemStack itemStack=inventory.getStack(inventory.getSelectedSlot());
+        ItemStack itemStack=inventory.getItem(inventory.getSelectedSlot());
         if(itemStack!=null)
         {
             if(itemStack.getCount()>1)
             {
-                source.sendFeedback(()-> Text.literal("ERR:Please hold only one!"),false);
+                source.sendSuccess(()-> Component.literal("ERR:Please hold only one!"),false);
                 return Command.SINGLE_SUCCESS;
             }
-            String curItem=itemStack.getItem().getTranslationKey();
+            String curItem=itemStack.getItem().getDescriptionId();
             if(curItem.equals("item.minecraft.filled_map"))
             {
-                itemStack.applyChanges(ComponentChanges.builder().remove(MAP_ID).add(Component.of(MAP_ID,new MapIdComponent(id))).build());
-                source.getPlayer().getInventory().setStack(inventory.getSelectedSlot(),itemStack);
+                itemStack.applyComponentsAndValidate(DataComponentPatch.builder().remove(MAP_ID).set(TypedDataComponent.createUnchecked(MAP_ID,new MapId(id))).build());
+                source.getPlayer().getInventory().setItem(inventory.getSelectedSlot(),itemStack);
             }
             else if(curItem.equals("item.minecraft.map"))
             {
 
                 ItemStack itemStack1=new ItemStack(Items.FILLED_MAP);
-                itemStack1.applyChanges(ComponentChanges.builder().add(Component.of(MAP_ID,new MapIdComponent(id))).build());
-                source.getPlayer().getInventory().setStack(inventory.getSelectedSlot(),itemStack1);
+                itemStack1.applyComponentsAndValidate(DataComponentPatch.builder().set(TypedDataComponent.createUnchecked(MAP_ID,new MapId(id))).build());
+                source.getPlayer().getInventory().setItem(inventory.getSelectedSlot(),itemStack1);
             }
             else
             {
-                source.sendFeedback(()-> Text.literal("ERR:Only maps are allowed!"),false);
+                source.sendSuccess(()-> Component.literal("ERR:Only maps are allowed!"),false);
                 return Command.SINGLE_SUCCESS;
             }
         }
         else
         {
-            source.sendFeedback(()-> Text.literal("ERR:Only maps are allowed!"),false);
+            source.sendSuccess(()-> Component.literal("ERR:Only maps are allowed!"),false);
             return Command.SINGLE_SUCCESS;
         }
         return Command.SINGLE_SUCCESS;
