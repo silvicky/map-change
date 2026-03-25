@@ -9,12 +9,9 @@ import net.minecraft.world.level.saveddata.maps.MapId;
 import net.minecraft.world.entity.player.Inventory;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.Items;
-import net.minecraft.nbt.CompoundTag;
 import net.minecraft.commands.CommandSourceStack;
 import net.minecraft.network.chat.Component;
 import net.minecraft.world.level.saveddata.maps.MapIndex;
-import net.minecraft.world.level.saveddata.SavedData;
-import net.minecraft.world.level.saveddata.SavedDataType;
 
 import static net.minecraft.core.component.DataComponents.MAP_ID;
 import static net.minecraft.commands.Commands.argument;
@@ -30,15 +27,7 @@ public class MapChange {
     }
     public static int mapChange(CommandSourceStack source, int id)
     {
-        MapIndex idCountsState= source.getServer().overworld().getDataStorage().computeIfAbsent
-                (
-                        //IdCountsState.getPersistentStateType(), "idcounts"
-                       MapIndex.TYPE
-                );
-        /*NbtCompound nbtCompound=new NbtCompound();
-
-        idCountsState.writeNbt(nbtCompound,source.getRegistryManager());
-        int maxId=nbtCompound.getInt("map").get();*/
+        MapIndex idCountsState= source.getServer().getDataStorage().computeIfAbsent(MapIndex.TYPE);
         int maxId=idCountsState.lastMapId;
         if(id<0||id>maxId)
         {
