@@ -14,7 +14,7 @@ public class Map implements ModInitializer {
     @Override
     public void onInitialize() {
         LOGGER.info("Loading MapChange...");
-        CommandRegistrationCallback.EVENT.register((dispatcher, registryAccess, environment) -> MapChange.register(dispatcher));
+        CommandRegistrationCallback.EVENT.register((dispatcher, _, _) -> MapChange.register(dispatcher));
 
     }
 }
